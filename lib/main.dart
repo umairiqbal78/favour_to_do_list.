@@ -18,28 +18,7 @@ class MyApp extends statelessWidget {
     );
   }
 }
-// class MyApp extends StatelessWidget {
-//   // This widget is the root of your application.
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       title: 'Flutter Demo',
-//       theme: ThemeData(
-//         // This is the theme of your application.
-//         //
-//         // Try running your application with "flutter run". You'll see the
-//         // application has a blue toolbar. Then, without quitting the app, try
-//         // changing the primarySwatch below to Colors.green and then invoke
-//         // "hot reload" (press "r" in the console where you ran "flutter run",
-//         // or simply save your changes to "hot reload" in a Flutter IDE).
-//         // Notice that the counter didn't reset back to zero; the application
-//         // is not restarted.
-//         primarySwatch: Colors.green,
-//       ),
-//       home: MyHomePage(title: 'Flutter'),
-//     );
-//   }
-// }
+
 class FavorsPage extends statelessWidget {
 // using mock values from mock_favors dart file for now
   final List<Favor> pendingAnswerFavors;
@@ -56,89 +35,118 @@ class FavorsPage extends statelessWidget {
   @override
   Widget build(BuildContext context) {...} // for brevity
 }
-// class MyHomePage extends StatefulWidget {
-//   MyHomePage({Key key, this.title}) : super(key: key);
-//
-//   // This widget is the home page of your application. It is stateful, meaning
-//   // that it has a State object (defined below) that contains fields that affect
-//   // how it looks.
-//
-//   // This class is the configuration for the state. It holds the values (in this
-//   // case the title) provided by the parent (in this case the App widget) and
-//   // used by the build method of the State. Fields in a Widget subclass are
-//   // always marked "final".
-//
-//   final String title;
-//
-//   @override
-//   _MyHomePageState createState() => _MyHomePageState();
-// }
+// The Tab bar items are created by the _buildCategoryChip() method, as follows:
 
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 10;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-
+class FavorsPage extends statelessWidget {
+// ... fields, build method and others
+  Widget _buildCategoryTab(String title) {
+    return Tab(
+      child: Text(title),
     );
   }
+}
+
+class FavorsPage extends statelessWidget {
+// ... fields, build method and others
+  Widget _favorsList(String title, List<Favor> favors) {
+    return Column(
+      mainAxisSize: MainAxisSize.max,
+      children: <Widget>[
+        Padding(
+          child: Text(title),
+          padding: EdgeInsets.only(top: 16.0),
+        ),
+        Expanded(
+          child: ListView.builder(
+            physics: BouncingScrollPhysics(),
+            itemCount: favors.length,
+            itemBuilder: (BuildContext context, int index) {
+              final favor = favors[index];
+              return Card(
+                key: ValueKey(favor.uuid),
+                margin: EdgeInsets.symmetric(vertical: 10.0,
+                    horizontal: 25.0),
+                child: Padding(
+                  child: Column(
+                    children: <Widget>[
+                      _itemHeader(favor),
+                      Text(favor.description),
+                      _itemFooter(favor)
+                    ],
+                  ),
+                  padding: EdgeInsets.all(8.0),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+Row _itemHeader(Favor favor) {
+  return Row(
+    children: <Widget>[
+      CircleAvatar(
+        backgroundImage: NetworkImage(
+          favor.friend.photoURL,
+        ),
+      ),
+      Expanded(
+          child: Padding(
+          padding: EdgeInsets.only(left: 8.0),
+      child: Text("${favor.friend.name} asked you to...")),
+      )
+    ],
+  );
+}
+
+Widget _itemFooter(Favor favor) {
+  if (favor.isCompleted) {
+    final format = DateFormat();
+    return Container(
+        margin: EdgeInsets.only(top: 8.0),
+        alignment: Alignment.centerRight,
+        child: Chip(label: Text("Completed at: ${format.format(favor.completed)}"),
+          ),
+    );
+          }
+        if (favor.isRequested) {
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              //FlatButton is a Material Design button that does not have an elevation or background color on it.
+              FlatButton(
+                child: Text("Refuse"),
+                onPressed: () {},
+              ),
+              FlatButton(
+                child: Text("Do"),
+                onPressed: () {},
+              )
+            ],
+          );
+      }
+    if (favor.isDoing) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: <Widget>[
+          FlatButton(
+            child: Text("give up"),
+            onPressed: () {},
+          ),
+          FlatButton(
+            child: Text("complete"),
+            onPressed: () {},
+          )
+        ],
+      );
+    }
+    return Container();
+  }
+class RequestFavorPage extends statelessWidget {
+  final List<Friend> friends;
+  RequestFavorPage({Key key, this.friends}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {...} // for brevety
 }
